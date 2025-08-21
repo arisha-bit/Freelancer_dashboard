@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Post a New Job</h2>
+
+<form method="post" action="/employer/post-job" class="space-y-4">
+  <input type="hidden" name="employer_id" value="{{ user_id }}" />
+  
+  <div>
+    <input name="title" placeholder="Job Title" required class="w-full border px-3 py-2 rounded" />
+  </div>
+
+  <div>
+    <textarea name="description" placeholder="Job Description" required class="w-full border px-3 py-2 rounded"></textarea>
+  </div>
+
+  <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Post Job</button>
+</form>
+{% endblock %}

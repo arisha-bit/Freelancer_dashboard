@@ -1,0 +1,17 @@
+{
+  "python.analysis.extraPaths": ["./app"],
+  "python.envFile": "${workspaceFolder}/.env",
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "local",
+      "database": "freelancer_db",
+      "username": "postgres",
+      "connectionTimeout": 30,
+      "password": "1234"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 60px auto; background: #f3f8fd; border-radius: 20px; box-shadow: 0 6px 32px #c7e0f7; padding: 36px 28px;">
+  <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 28px; color: #5b7fa3; display: flex; align-items: center; gap: 10px;">
+    <!-- Lock Icon -->
+    <svg width="28" height="28" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24">
+      <rect x="5" y="11" width="14" height="9" rx="3" fill="#dbeafe"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 17v-2"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 018 0v4"/>
+    </svg>
+    Login
+  </h2>
+
+  {% if error %}
+    <p style="color: #ef4444; background: #fee2e2; padding: 8px 0 8px 12px; border-radius: 8px; margin-bottom: 18px;">{{ error }}</p>
+  {% endif %}
+
+  <form method="post">
+    <div style="margin-bottom: 18px;">
+      <label style="font-weight: 500; color: #5b7fa3; display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+        <!-- Envelope Icon -->
+        <svg width="18" height="18" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="14" rx="3" fill="#f0f9ff"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
+        </svg>
+        Email
+      </label>
+      <input name="email" type="email" placeholder="Email" required style="width: 100%; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 12px; background: #fff; font-size: 1rem; box-shadow: 0 2px 8px #e0e7ff;" />
+    </div>
+    <div style="margin-bottom: 24px;">
+      <label style="font-weight: 500; color: #5b7fa3; display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+        <!-- Key Icon -->
+        <svg width="18" height="18" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="8" cy="15" r="4" fill="#f0f9ff"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l-4.5 4.5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 5l-2 2"/>
+        </svg>
+        Password
+      </label>
+      <input name="password" type="password" placeholder="Password" required style="width: 100%; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 12px; background: #fff; font-size: 1rem; box-shadow: 0 2px 8px #e0e7ff;" />
+    </div>
+    <button type="submit" style="background: #a5b4fc; color: #374151; font-weight: 700; padding: 12px 0; border-radius: 14px; border: none; box-shadow: 0 2px 12px #dbeafe; cursor: pointer; width: 100%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <!-- Login Arrow Icon -->
+      <svg width="20" height="20" fill="none" stroke="#5b7fa3" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-4-4l4 4-4 4"/>
+      </svg>
+      Login
+    </button>
+  </form>
+</div>
+{% endblock %}

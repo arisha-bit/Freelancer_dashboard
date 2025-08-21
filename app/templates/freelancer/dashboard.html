@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <h2 style="font-size: 2.2rem; font-weight: bold; color: #5b7fa3;">
+      Freelancer Dashboard
+    </h2>
+    <a href="/logout" style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 10px 22px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px #fecaca;">Logout</a>
+  </div>
+
+  <!-- Available Jobs Accordion -->
+  <div style="margin-bottom: 24px;">
+    <h3 style="font-size: 1.3rem; font-weight: 600; color: #5b7fa3; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleAccordion('available-jobs')">
+      Available Jobs
+      <span id="available-jobs-arrow" style="display: inline-block; font-size: 1.2rem; transform: rotate(0deg); transition: transform 0.3s; position: relative; top: 3px;">&#9660;</span>
+    </h3>
+    <div id="available-jobs" style="display: none; margin-top: 10px;">
+      {% if jobs %}
+        <div id="job-carousel" style="position: relative; overflow: hidden; padding-bottom: 50px;">
+          <div id="job-list" style="display: flex; transition: transform 0.3s;">
+            {% for job in jobs %}
+            <div style="min-width: 100%; background: #f3f8fd; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px #e0e7ff;">
+              <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ job.title }}</h4>
+              <p>{{ job.description }}</p>
+              <a href="/freelancer/apply/{{ job.id }}?freelancer_id={{ freelancer_id }}" style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; text-decoration: none; display: inline-block; margin-top: 10px;">Apply</a>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Carousel arrows -->
+          <button onclick="prevJob()" style="position: absolute; left: 50%; transform: translateX(-120%) translateY(0); bottom: 10px; background: #6ee7b7; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bbf7d0;">&#8592;</button>
+          <button onclick="nextJob()" style="position: absolute; left: 50%; transform: translateX(40%) translateY(0); bottom: 10px; background: #6ee7b7; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bbf7d0;">&#8594;</button>
+        </div>
+      {% else %}
+        <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px;">No jobs available.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Applied Jobs Accordion -->
+  <div>
+    <h3 style="font-size: 1.3rem; font-weight: 600; color: #5b7fa3; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleAccordion('applied-jobs')">
+      Jobs Applied
+      <span id="applied-jobs-arrow" style="display: inline-block; font-size: 1.2rem; transform: rotate(0deg); transition: transform 0.3s; position: relative; top: 3px;">&#9660;</span>
+    </h3>
+    <div id="applied-jobs" style="display: none; margin-top: 10px;">
+      {% if applications %}
+        <div id="applied-carousel" style="position: relative; overflow: hidden; padding-bottom: 50px;">
+          <div id="applied-list" style="display: flex; transition: transform 0.3s;">
+            {% for app in applications %}
+            <div style="min-width: 100%; background: #fff; border: 1.5px solid #c7d2fe; border-radius: 16px; box-shadow: 0 2px 12px #e0e7ff; padding: 22px;">
+              <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ app.job.title }}</h4>
+              <p><strong>Experience:</strong> {{ app.experience }}</p>
+              <p><strong>Cover Letter:</strong> {{ app.cover_letter }}</p>
+              <p><strong>Resume:</strong> <a href="{{ app.resume_link }}" target="_blank" style="color: #60a5fa; text-decoration: underline;">View Resume</a></p>
+              <form action="/freelancer/delete-application/{{ app.id }}" method="post" style="margin-top: 12px;">
+                <input type="hidden" name="user_id" value="{{ freelancer_id }}">
+                <button style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; cursor: pointer;">Delete Application</button>
+              </form>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Carousel arrows -->
+          <button onclick="prevApplied()" style="position: absolute; left: 50%; transform: translateX(-120%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8592;</button>
+          <button onclick="nextApplied()" style="position: absolute; left: 50%; transform: translateX(40%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8594;</button>
+        </div>
+      {% else %}
+        <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px;">No jobs applied yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleAccordion(id) {
+    const el = document.getElementById(id);
+    const arrow = document.getElementById(id + '-arrow');
+    if (el.style.display === "none") {
+      el.style.display = "block";
+      arrow.style.transform = "rotate(180deg)";
+    } else {
+      el.style.display = "none";
+      arrow.style.transform = "rotate(0deg)";
+    }
+  }
+
+  // Available Jobs Carousel
+  let currentJob = 0;
+  const jobList = document.getElementById('job-list');
+  const jobs = jobList ? jobList.children : [];
+  function updateJob() { if(jobList) jobList.style.transform = `translateX(-${currentJob*100}%)`; }
+  function nextJob() { if(jobs.length===0) return; currentJob=(currentJob+1)%jobs.length; updateJob(); }
+  function prevJob() { if(jobs.length===0) return; currentJob=(currentJob-1+jobs.length)%jobs.length; updateJob(); }
+
+  // Applied Jobs Carousel
+  let currentApplied = 0;
+  const appliedList = document.getElementById('applied-list');
+  const appliedJobs = appliedList ? appliedList.children : [];
+  function updateApplied() { if(appliedList) appliedList.style.transform = `translateX(-${currentApplied*100}%)`; }
+  function nextApplied() { if(appliedJobs.length===0) return; currentApplied=(currentApplied+1)%appliedJobs.length; updateApplied(); }
+  function prevApplied() { if(appliedJobs.length===0) return; currentApplied=(currentApplied-1+appliedJobs.length)%appliedJobs.length; updateApplied(); }
+</script>
+{% endblock %}
