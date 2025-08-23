@@ -8,112 +8,24 @@
       Employer Dashboard
     </h2>
     <div style="display: flex; gap: 10px;">
-      <a href="/employer/post-job?user_id={{ user_id }}" style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 10px 22px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px #bbf7d0;">Post Job</a>
-      <a href="/logout" style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 10px 22px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px #fecaca;">Logout</a>
+      <a href="/employer/post-job?user_id={{ user_id }}" 
+         style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 10px 22px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px #bbf7d0;">Post Job</a>
+      <a href="/logout" 
+         style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 10px 22px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px #fecaca;">Logout</a>
     </div>
   </div>
 
-  {% if success %}
-    <div style="background: #d1fae5; color: #065f46; padding: 12px 20px; border-radius: 10px; margin-bottom: 24px; font-weight: 500;">
-      {{ success }}
-    </div>
-  {% endif %}
-
-  <!-- Jobs Posted Accordion -->
-  <div style="margin-bottom: 24px;">
-    <h3 style="font-size: 1.3rem; font-weight: 600; color: #5b7fa3; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleAccordion('jobs-posted')">
-      Your Jobs
-      <span id="jobs-posted-arrow" style="display: inline-block; font-size: 1.2rem; transform: rotate(0deg); transition: transform 0.3s; position: relative; top: 3px;">&#9660;</span>
-    </h3>
-    <div id="jobs-posted" style="display: none; margin-top: 10px;">
-      {% if jobs %}
-        <div id="job-carousel" style="position: relative; overflow: hidden; padding-bottom: 50px;">
-          <div id="job-list" style="display: flex; transition: transform 0.3s;">
-            {% for job in jobs %}
-            <div style="min-width: 100%; background: #f3f8fd; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px #e0e7ff;">
-              <span>{{ job.title }}</span>
-              <form action="/employer/delete-job/{{ job.id }}" method="post" style="margin-top: 12px;">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button style="color: #ef4444; background: #fee2e2; border: none; border-radius: 7px; padding: 6px 14px; font-size: 0.95rem; font-weight: 500; cursor: pointer;">Delete</button>
-              </form>
-            </div>
-            {% endfor %}
-          </div>
-
-          <!-- Carousel arrows -->
-          <button onclick="prevJob()" style="position: absolute; left: 50%; transform: translateX(-120%) translateY(0); bottom: 10px; background: #6ee7b7; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bbf7d0;">&#8592;</button>
-          <button onclick="nextJob()" style="position: absolute; left: 50%; transform: translateX(40%) translateY(0); bottom: 10px; background: #6ee7b7; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bbf7d0;">&#8594;</button>
-        </div>
-      {% else %}
-        <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px;">No jobs posted yet.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Applications Received Accordion -->
-  <div>
-    <h3 style="font-size: 1.3rem; font-weight: 600; color: #5b7fa3; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleAccordion('applications-received')">
-      Applications Received
-      <span id="applications-received-arrow" style="display: inline-block; font-size: 1.2rem; transform: rotate(0deg); transition: transform 0.3s; position: relative; top: 3px;">&#9660;</span>
-    </h3>
-    <div id="applications-received" style="display: none; margin-top: 10px;">
-      {% if applications %}
-        <div id="applied-carousel" style="position: relative; overflow: hidden; padding-bottom: 50px;">
-          <div id="applied-list" style="display: flex; transition: transform 0.3s;">
-            {% for app in applications %}
-            <div style="min-width: 100%; background: #fff; border: 1.5px solid #c7d2fe; border-radius: 16px; box-shadow: 0 2px 12px #e0e7ff; padding: 22px;">
-              <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ app.freelancer.name }}</h4>
-              <p><strong>Experience:</strong> {{ app.experience }}</p>
-              <p><strong>Cover Letter:</strong> {{ app.cover_letter }}</p>
-              <p><strong>Resume:</strong> <a href="{{ app.resume_link }}" target="_blank" style="color: #60a5fa; text-decoration: underline;">View Resume</a></p>
-              <form action="/employer/decision/{{ app.id }}" method="post" style="margin-top: 12px; display: flex; gap: 10px;">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button name="status" value="Accepted" style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #bbf7d0; cursor: pointer;">Accept</button>
-                <button name="status" value="Rejected" style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #fecaca; cursor: pointer;">Reject</button>
-              </form>
-            </div>
-            {% endfor %}
-          </div>
-
-          <!-- Carousel arrows -->
-          <button onclick="prevApplied()" style="position: absolute; left: 50%; transform: translateX(-120%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8592;</button>
-          <button onclick="nextApplied()" style="position: absolute; left: 50%; transform: translateX(40%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8594;</button>
-        </div>
-      {% else %}
-        <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px;">No applications received yet.</p>
-      {% endif %}
-    </div>
+  <!-- Navigation -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <a href="/employer/jobs?user_id={{ user_id }}" 
+       style="background: #f3f8fd; padding: 20px; border-radius: 12px; font-size: 1.3rem; font-weight: 600; color: #374151; text-decoration: none; box-shadow: 0 2px 12px #e0e7ff;">
+       📋 View Your Jobs
+    </a>
+    <a href="/employer/applications?user_id={{ user_id }}" 
+       style="background: #f3f8fd; padding: 20px; border-radius: 12px; font-size: 1.3rem; font-weight: 600; color: #374151; text-decoration: none; box-shadow: 0 2px 12px #e0e7ff;">
+       📩 View Applications Received
+    </a>
   </div>
 
 </div>
-
-<script>
-  function toggleAccordion(id) {
-    const el = document.getElementById(id);
-    const arrow = document.getElementById(id + '-arrow');
-    if (el.style.display === "none") {
-      el.style.display = "block";
-      arrow.style.transform = "rotate(180deg)";
-    } else {
-      el.style.display = "none";
-      arrow.style.transform = "rotate(0deg)";
-    }
-  }
-
-  // Jobs Carousel
-  let currentJob = 0;
-  const jobList = document.getElementById('job-list');
-  const jobs = jobList ? jobList.children : [];
-  function updateJob() { if(jobList) jobList.style.transform = `translateX(-${currentJob*100}%)`; }
-  function nextJob() { if(jobs.length===0) return; currentJob=(currentJob+1)%jobs.length; updateJob(); }
-  function prevJob() { if(jobs.length===0) return; currentJob=(currentJob-1+jobs.length)%jobs.length; updateJob(); }
-
-  // Applications Carousel
-  let currentApplied = 0;
-  const appliedList = document.getElementById('applied-list');
-  const appliedJobs = appliedList ? appliedList.children : [];
-  function updateApplied() { if(appliedList) appliedList.style.transform = `translateX(-${currentApplied*100}%)`; }
-  function nextApplied() { if(appliedJobs.length===0) return; currentApplied=(currentApplied+1)%appliedJobs.length; updateApplied(); }
-  function prevApplied() { if(appliedJobs.length===0) return; currentApplied=(currentApplied-1+appliedJobs.length)%appliedJobs.length; updateApplied(); }
-</script>
 {% endblock %}

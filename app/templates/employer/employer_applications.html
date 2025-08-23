@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto;">
+
+  <h2 style="font-size: 2rem; font-weight: bold; color: #5b7fa3; margin-bottom: 20px; text-align: center;">
+    Applications Received
+  </h2>
+
+  {% if applications %}
+  <div id="application-carousel" style="position: relative;">
+    {% for app in applications %}
+    <div class="app-card" style="background: #fff; border: 1.5px solid #c7d2fe; border-radius: 16px; box-shadow: 0 2px 12px #e0e7ff; padding: 22px; margin-bottom: 20px; display: {% if loop.first %}block{% else %}none{% endif %};">
+      <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ app.freelancer.name }}</h4>
+      <p><strong>Experience:</strong> {{ app.experience }}</p>
+      <p><strong>Cover Letter:</strong> {{ app.cover_letter }}</p>
+      <p><strong>Resume:</strong> <a href="{{ app.resume_link }}" target="_blank" style="color: #60a5fa; text-decoration: underline;">View Resume</a></p>
+      <form action="/employer/decision/{{ app.id }}" method="post" style="margin-top: 12px; display: flex; gap: 10px;">
+        <input type="hidden" name="user_id" value="{{ user_id }}">
+        <button name="status" value="Accepted" style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #bbf7d0; cursor: pointer;">Accept</button>
+        <button name="status" value="Rejected" style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #fecaca; cursor: pointer;">Reject</button>
+      </form>
+    </div>
+    {% endfor %}
+
+    <!-- Carousel Buttons -->
+    <button onclick="prevApp()" style="position: absolute; top: 50%; left: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10094;</button>
+    <button onclick="nextApp()" style="position: absolute; top: 50%; right: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10095;</button>
+  </div>
+  {% else %}
+    <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px; text-align: center;">No applications received yet.</p>
+  {% endif %}
+
+  <div style="margin-top: 20px; text-align: center;">
+    <a href="/employer/dashboard?user_id={{ user_id }}" 
+       style="color: #3b82f6; text-decoration: underline; font-weight: 500;">⬅ Back to Dashboard</a>
+  </div>
+</div>
+
+<script>
+let currentAppIndex = 0;
+const apps = document.querySelectorAll(".app-card");
+
+function showApp(index) {
+  apps.forEach((app, i) => {
+    app.style.display = (i === index) ? "block" : "none";
+  });
+}
+
+function nextApp() {
+  currentAppIndex = (currentAppIndex + 1) % apps.length;
+  showApp(currentAppIndex);
+}
+
+function prevApp() {
+  currentAppIndex = (currentAppIndex - 1 + apps.length) % apps.length;
+  showApp(currentAppIndex);
+}
+</script>
+{% endblock %}

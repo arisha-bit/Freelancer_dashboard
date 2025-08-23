@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+
+  <h2 style="font-size: 2rem; font-weight: bold; color: #5b7fa3; margin-bottom: 20px; text-align: center;">
+    Available Jobs
+  </h2>
+
+  {% if jobs %}
+  <div id="job-carousel" style="position: relative;">
+    {% for job in jobs %}
+    <div class="job-card" style="background: #f3f8fd; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px #e0e7ff; display: {% if loop.first %}block{% else %}none{% endif %};">
+      <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ job.title }}</h4>
+      <p>{{ job.description }}</p>
+      <a href="/freelancer/apply/{{ job.id }}?freelancer_id={{ freelancer_id }}" 
+         style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; text-decoration: none; display: inline-block; margin-top: 10px;">
+         Apply
+      </a>
+    </div>
+    {% endfor %}
+
+    <!-- Carousel Buttons -->
+    <button onclick="prevJob()" style="position: absolute; top: 50%; left: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10094;</button>
+    <button onclick="nextJob()" style="position: absolute; top: 50%; right: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10095;</button>
+  </div>
+  {% else %}
+    <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px; text-align: center;">No jobs available.</p>
+  {% endif %}
+
+</div>
+
+<script>
+let currentIndex = 0;
+const jobs = document.querySelectorAll(".job-card");
+
+function showJob(index) {
+  jobs.forEach((job, i) => {
+    job.style.display = (i === index) ? "block" : "none";
+  });
+}
+
+function nextJob() {
+  currentIndex = (currentIndex + 1) % jobs.length;
+  showJob(currentIndex);
+}
+
+function prevJob() {
+  currentIndex = (currentIndex - 1 + jobs.length) % jobs.length;
+  showJob(currentIndex);
+}
+</script>
+{% endblock %}

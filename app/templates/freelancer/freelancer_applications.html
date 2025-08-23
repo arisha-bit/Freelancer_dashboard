@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+
+  <h2 style="font-size: 2rem; font-weight: bold; color: #5b7fa3; margin-bottom: 20px;">
+    Jobs Applied
+  </h2>
+
+  {% if applications %}
+    <div id="applied-carousel" style="position: relative; overflow: hidden; padding-bottom: 50px;">
+      <div id="applied-list" style="display: flex; transition: transform 0.3s;">
+        {% for app in applications %}
+        <div style="min-width: 100%; background: #fff; border: 1.5px solid #c7d2fe; border-radius: 16px; padding: 22px; margin-bottom: 20px; box-shadow: 0 2px 12px #e0e7ff;">
+          <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ app.job.title }}</h4>
+          <p><strong>Experience:</strong> {{ app.experience }}</p>
+          <p><strong>Cover Letter:</strong> {{ app.cover_letter }}</p>
+          <p><strong>Resume:</strong> 
+            <a href="{{ app.resume_link }}" target="_blank" style="color: #60a5fa; text-decoration: underline;">View Resume</a>
+          </p>
+          <form action="/freelancer/delete-application/{{ app.id }}" method="post" style="margin-top: 12px;">
+            <input type="hidden" name="user_id" value="{{ freelancer_id }}">
+            <button style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; cursor: pointer;">Delete Application</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Carousel arrows -->
+      <button onclick="prevApplied()" style="position: absolute; left: 50%; transform: translateX(-120%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8592;</button>
+      <button onclick="nextApplied()" style="position: absolute; left: 50%; transform: translateX(40%) translateY(0); bottom: 10px; background: #60a5fa; border: none; padding: 10px 16px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px #bfdbfe;">&#8594;</button>
+    </div>
+  {% else %}
+    <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px;">No jobs applied yet.</p>
+  {% endif %}
+
+</div>
+
+<script>
+  let currentApplied = 0;
+  const appliedList = document.getElementById('applied-list');
+  const appliedJobs = appliedList ? appliedList.children : [];
+
+  function updateApplied() {
+    if (appliedList) {
+      appliedList.style.transform = `translateX(-${currentApplied * 100}%)`;
+    }
+  }
+
+  function nextApplied() {
+    if (appliedJobs.length === 0) return;
+    currentApplied = (currentApplied + 1) % appliedJobs.length;
+    updateApplied();
+  }
+
+  function prevApplied() {
+    if (appliedJobs.length === 0) return;
+    currentApplied = (currentApplied - 1 + appliedJobs.length) % appliedJobs.length;
+    updateApplied();
+  }
+</script>
+{% endblock %}

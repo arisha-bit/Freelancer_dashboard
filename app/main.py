@@ -66,7 +66,12 @@ def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
-def login_user(request: Request, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+def login_user(
+    request: Request, 
+    email: str = Form(...), 
+    password: str = Form(...), 
+    db: Session = Depends(get_db)
+):
     user_obj = user_crud.get_user_by_email(db, email=email)
     if user_obj is None or getattr(user_obj, "password", None) != password:
         return templates.TemplateResponse(
@@ -139,6 +144,28 @@ def delete_application(application_id: int, user_id: int = Form(...), db: Sessio
         f"/freelancer/dashboard?user_id={user_id}&success=Application+deleted!",
         status_code=303
     )
+    from app.models.job_application import JobApplication  # make sure this import exists
+
+# Freelancer Available Jobs Page
+@app.get("/freelancer/{freelancer_id}/jobs", response_class=HTMLResponse)
+def freelancer_jobs(request: Request, freelancer_id: int, db: Session = Depends(get_db)):
+    jobs = db.query(Job).all()
+    return templates.TemplateResponse("freelancer/freelancer_jobs.html", {
+        "request": request,
+        "jobs": jobs,
+        "freelancer_id": freelancer_id
+    })
+
+# Freelancer Applied Jobs Page
+@app.get("/freelancer/{freelancer_id}/applications", response_class=HTMLResponse)
+def freelancer_applications(request: Request, freelancer_id: int, db: Session = Depends(get_db)):
+    applications = db.query(JobApplication).filter(JobApplication.freelancer_id == freelancer_id).all()
+    return templates.TemplateResponse("freelancer/freelancer_applications.html", {
+        "request": request,
+        "applications": applications,
+        "freelancer_id": freelancer_id
+    })
+
 
 # ------------------ Employer Routes ------------------
 @app.get("/employer/dashboard", response_class=HTMLResponse)
@@ -161,16 +188,50 @@ def employer_dashboard(
         }
     )
 
+@app.get("/employer/jobs", response_class=HTMLResponse)
+def employer_jobs(request: Request, user_id: int, db: Session = Depends(get_db)):
+    jobs = db.query(Job).filter(Job.employer_id == user_id).all()
+    return templates.TemplateResponse("employer/employer_jobs.html", {
+        "request": request,
+        "user_id": user_id,
+        "jobs": jobs
+    })
+
+@app.post("/employer/delete-job/{job_id}")
+def delete_job(job_id: int, user_id: int = Form(...), db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if job:
+        db.delete(job)
+        db.commit()
+    return RedirectResponse(url=f"/employer/jobs?user_id={user_id}&success=Job+deleted!", status_code=303)
+
+@app.get("/employer/applications", response_class=HTMLResponse)
+def employer_applications(request: Request, user_id: int, db: Session = Depends(get_db)):
+    applications = (
+        db.query(JobApplication)
+        .join(Job, Job.id == JobApplication.job_id)
+        .filter(Job.employer_id == user_id)
+        .all()
+    )
+    return templates.TemplateResponse("employer/employer_applications.html", {
+        "request": request,
+        "user_id": user_id,
+        "applications": applications
+    })
+
 @app.post("/employer/decision/{application_id}")
-def update_application_status(
-    application_id: int,
-    status: str = Form(...),
-    user_id: int = Form(...),
+def employer_decision(
+    application_id: int, 
+    user_id: int = Form(...), 
+    status: str = Form(...), 
     db: Session = Depends(get_db)
 ):
-    app_crud.update_application_status(db, application_id=application_id, status=status)
+    db.query(JobApplication).filter(JobApplication.id == application_id).update(
+        {"status": status}
+    )
+    db.commit()
     return RedirectResponse(
-        f"/employer/dashboard?user_id={user_id}&success=Status+updated!",
+        url=f"/employer/applications?user_id={user_id}&success=Status+updated!", 
         status_code=303
     )
 
@@ -189,13 +250,5 @@ def post_job(
     job_crud.create_job(db=db, job=job_data, employer_id=employer_id)
     return RedirectResponse(
         f"/employer/dashboard?user_id={employer_id}&success=Job+posted+successfully!",
-        status_code=303
-    )
-
-@app.post("/employer/delete-job/{job_id}")
-def delete_job(job_id: int, user_id: int = Form(...), db: Session = Depends(get_db)):
-    job_crud.delete_job(db, job_id=job_id)
-    return RedirectResponse(
-        f"/employer/dashboard?user_id={user_id}&success=Job+deleted!",
         status_code=303
     )
