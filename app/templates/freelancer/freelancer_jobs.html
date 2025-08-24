@@ -1,52 +1,507 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-
-  <h2 style="font-size: 2rem; font-weight: bold; color: #5b7fa3; margin-bottom: 20px; text-align: center;">
-    Available Jobs
-  </h2>
-
+<div class="jobs-container">
+  <h2 class="page-title">Available Jobs</h2>
+  
   {% if jobs %}
-  <div id="job-carousel" style="position: relative;">
-    {% for job in jobs %}
-    <div class="job-card" style="background: #f3f8fd; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px #e0e7ff; display: {% if loop.first %}block{% else %}none{% endif %};">
-      <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ job.title }}</h4>
-      <p>{{ job.description }}</p>
-      <a href="/freelancer/apply/{{ job.id }}?freelancer_id={{ freelancer_id }}" 
-         style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; text-decoration: none; display: inline-block; margin-top: 10px;">
-         Apply
-      </a>
+    <div class="carousel-wrapper">
+      <div class="carousel-container" id="job-carousel">
+        <div class="carousel-track" id="job-list">
+          {% for job in jobs %}
+          <div class="job-card" data-index="{{ loop.index0 }}">
+            <div class="job-header">
+              <h4 class="job-title">{{ job.title }}</h4>
+              <span class="job-badge">Available</span>
+            </div>
+            
+            <div class="job-content">
+              <div class="job-description">
+                {{ job.description }}
+              </div>
+              
+              {% if job.requirements %}
+              <div class="job-requirements">
+                <h5>Requirements:</h5>
+                <p>{{ job.requirements }}</p>
+              </div>
+              {% endif %}
+              
+              {% if job.salary %}
+              <div class="job-salary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M16 8l-4 4-4-4"/>
+                </svg>
+                <span>${{ job.salary }}</span>
+              </div>
+              {% endif %}
+            </div>
+            
+            <div class="job-actions">
+              <a href="/freelancer/apply/{{ job.id }}?freelancer_id={{ freelancer_id }}" class="apply-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 11H7l3-7 3 7h-2l-2-5-2 5z"/>
+                  <path d="M13 21H7l3-7h6l-3 7z"/>
+                </svg>
+                Apply Now
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <div class="carousel-controls">
+        <button onclick="prevJob()" class="carousel-btn prev-btn" id="prevBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+        </button>
+        
+        <div class="carousel-info">
+          <span id="currentJob">1</span> / <span id="totalJobs">{{ jobs|length }}</span>
+        </div>
+        
+        <button onclick="nextJob()" class="carousel-btn next-btn" id="nextBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <polyline points="9,18 15,12 9,6"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="carousel-dots" id="carouselDots"></div>
     </div>
-    {% endfor %}
-
-    <!-- Carousel Buttons -->
-    <button onclick="prevJob()" style="position: absolute; top: 50%; left: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10094;</button>
-    <button onclick="nextJob()" style="position: absolute; top: 50%; right: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10095;</button>
-  </div>
   {% else %}
-    <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px; text-align: center;">No jobs available.</p>
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <h3>No Jobs Available</h3>
+      <p>Check back later for new opportunities</p>
+    </div>
   {% endif %}
-
 </div>
+
+<style>
+/* --- kept everything the same except save-btn styles removed --- */
+
+.jobs-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.jobs-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23a8c8ec" opacity="0.1"/></svg>');
+  pointer-events: none;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 30px;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 1;
+}
+
+.carousel-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  min-height: 400px;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.job-card {
+  min-width: 100%;
+  background: white;
+  border: 2px solid rgba(168, 200, 236, 0.1);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.job-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #a8c8ec, #b5a7d6);
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.job-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.job-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.job-content {
+  margin-bottom: 28px;
+}
+
+.job-description {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid #a8c8ec;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 1.05rem;
+}
+
+.job-requirements {
+  margin-bottom: 16px;
+}
+
+.job-requirements h5 {
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+}
+
+.job-requirements p {
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.job-salary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: 1px solid #fbbf24;
+}
+
+.job-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.apply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.apply-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.carousel-btn {
+  background: white;
+  border: 2px solid rgba(168, 200, 236, 0.2);
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #a8c8ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.carousel-btn:hover:not(:disabled) {
+  background: #a8c8ec;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(168, 200, 236, 0.3);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carousel-info {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(168, 200, 236, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background: #a8c8ec;
+  transform: scale(1.2);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #64748b;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-icon {
+  margin: 0 auto 24px;
+  opacity: 0.6;
+  color: #94a3b8;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .jobs-container {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .job-card {
+    padding: 20px;
+  }
+  
+  .job-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .job-title {
+    font-size: 1.5rem;
+  }
+  
+  .job-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .apply-btn {
+    flex: none;
+    width: 100%;
+  }
+  
+  .carousel-controls {
+    gap: 16px;
+  }
+}
+</style>
 
 <script>
 let currentIndex = 0;
-const jobs = document.querySelectorAll(".job-card");
+const jobList = document.getElementById('job-list');
+const jobs = jobList ? jobList.children : [];
+const dotsContainer = document.getElementById('carouselDots');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const currentJobSpan = document.getElementById('currentJob');
+const totalJobsSpan = document.getElementById('totalJobs');
 
-function showJob(index) {
-  jobs.forEach((job, i) => {
-    job.style.display = (i === index) ? "block" : "none";
-  });
+function initCarousel() {
+  if (jobs.length <= 1) {
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    const controls = document.querySelector('.carousel-controls');
+    if (controls) controls.style.display = 'none';
+    return;
+  }
+  
+  createDots();
+  updateCarousel();
+}
+
+function createDots() {
+  if (!dotsContainer) return;
+  
+  dotsContainer.innerHTML = '';
+  for (let i = 0; i < jobs.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i === 0) dot.classList.add('active');
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  }
+}
+
+function updateCarousel() {
+  if (!jobList) return;
+  
+  jobList.style.transform = `translateX(-${currentIndex * 100}%)`;
+  
+  const dots = dotsContainer ? dotsContainer.children : [];
+  for (let i = 0; i < dots.length; i++) {
+    dots[i].classList.toggle('active', i === currentIndex);
+  }
+  
+  if (prevBtn) prevBtn.disabled = currentIndex === 0;
+  if (nextBtn) nextBtn.disabled = currentIndex === jobs.length - 1;
+  
+  if (currentJobSpan) currentJobSpan.textContent = currentIndex + 1;
 }
 
 function nextJob() {
-  currentIndex = (currentIndex + 1) % jobs.length;
-  showJob(currentIndex);
+  if (jobs.length === 0 || currentIndex >= jobs.length - 1) return;
+  currentIndex++;
+  updateCarousel();
 }
 
 function prevJob() {
-  currentIndex = (currentIndex - 1 + jobs.length) % jobs.length;
-  showJob(currentIndex);
+  if (jobs.length === 0 || currentIndex <= 0) return;
+  currentIndex--;
+  updateCarousel();
+}
+
+function goToSlide(index) {
+  if (index >= 0 && index < jobs.length) {
+    currentIndex = index;
+    updateCarousel();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initCarousel);
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft') prevJob();
+  if (e.key === 'ArrowRight') nextJob();
+});
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+if (jobList) {
+  jobList.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  jobList.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  });
+}
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const diff = touchStartX - touchEndX;
+  
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0) {
+      nextJob();
+    } else {
+      prevJob();
+    }
+  }
 }
 </script>
 {% endblock %}

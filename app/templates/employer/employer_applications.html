@@ -1,59 +1,692 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width: 900px; margin: 40px auto;">
 
-  <h2 style="font-size: 2rem; font-weight: bold; color: #5b7fa3; margin-bottom: 20px; text-align: center;">
-    Applications Received
-  </h2>
+<style>
+  @keyframes slideInFromTop {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); }
+  }
+  
+  .dashboard-header {
+    animation: slideInFromTop 0.6s ease-out;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 32px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  }
+  
+  .status-filters {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .filter-btn.active {
+    transform: scale(1.05);
+  }
+  
+  .filter-btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  .filter-all {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+  }
+  
+  .filter-all.active {
+    background: linear-gradient(135deg, #374151, #1f2937);
+  }
+  
+  .filter-pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  }
+  
+  .filter-pending.active {
+    background: linear-gradient(135deg, #d97706, #b45309);
+  }
+  
+  .filter-accepted {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  }
+  
+  .filter-accepted.active {
+    background: linear-gradient(135deg, #059669, #047857);
+    animation: pulseGlow 2s infinite;
+  }
+  
+  .filter-rejected {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  }
+  
+  .filter-rejected.active {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+  }
+  
+  .applications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .application-card {
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInScale 0.6s ease-out;
+    border: 2px solid transparent;
+  }
+  
+  .application-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .application-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 20px 20px 0 0;
+  }
+  
+  /* Pending Applications - Orange Theme */
+  .application-card.status-pending {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+  
+  .application-card.status-pending::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+  }
+  
+  .application-card.status-pending .freelancer-avatar {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+  }
+  
+  .application-card.status-pending .status-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+  }
+  
+  /* Accepted Applications - Green Theme */
+  .application-card.status-accepted {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
+  }
+  
+  .application-card.status-accepted::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+  }
+  
+  .application-card.status-accepted .freelancer-avatar {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  
+  .application-card.status-accepted .status-badge {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+  }
+  
+  /* Rejected Applications - Red Theme */
+  .application-card.status-rejected {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: rgba(239, 68, 68, 0.2);
+    opacity: 0.8;
+  }
+  
+  .application-card.status-rejected::before {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+  
+  .application-card.status-rejected .freelancer-avatar {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+  
+  .application-card.status-rejected .status-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+  
+  .freelancer-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .freelancer-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .freelancer-details h4 {
+    margin: 0 0 4px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .job-title {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  
+  .status-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .application-details {
+    margin-bottom: 20px;
+  }
+  
+  .detail-section {
+    margin-bottom: 16px;
+  }
+  
+  .detail-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    display: block;
+  }
+  
+  .detail-value {
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  
+  .cover-letter-preview {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid currentColor;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+  
+  .resume-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+  }
+  
+  .resume-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  
+  .action-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .accept-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+  
+  .accept-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+  
+  .reject-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  }
+  
+  .reject-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  
+  .status-actions {
+    text-align: center;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 16px;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .status-accepted-msg {
+    background: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .status-rejected-msg {
+    background: rgba(239, 68, 68, 0.1);
+    color: #7f1d1d;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    border: 2px dashed #d1d5db;
+  }
+  
+  .stats-summary {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-item {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 16px 24px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+  }
+  
+  .stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  
+  .stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .stat-pending .stat-number { color: #f59e0b; }
+  .stat-accepted .stat-number { color: #10b981; }
+  .stat-rejected .stat-number { color: #ef4444; }
+  
+  @media (max-width: 768px) {
+    .applications-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .status-filters {
+      gap: 8px;
+    }
+    
+    .filter-btn {
+      padding: 10px 16px;
+      font-size: 0.8rem;
+    }
+    
+    .stats-summary {
+      gap: 16px;
+    }
+  }
+</style>
 
-  {% if applications %}
-  <div id="application-carousel" style="position: relative;">
-    {% for app in applications %}
-    <div class="app-card" style="background: #fff; border: 1.5px solid #c7d2fe; border-radius: 16px; box-shadow: 0 2px 12px #e0e7ff; padding: 22px; margin-bottom: 20px; display: {% if loop.first %}block{% else %}none{% endif %};">
-      <h4 style="font-weight: 600; color: #374151; margin-bottom: 6px;">{{ app.freelancer.name }}</h4>
-      <p><strong>Experience:</strong> {{ app.experience }}</p>
-      <p><strong>Cover Letter:</strong> {{ app.cover_letter }}</p>
-      <p><strong>Resume:</strong> <a href="{{ app.resume_link }}" target="_blank" style="color: #60a5fa; text-decoration: underline;">View Resume</a></p>
-      <form action="/employer/decision/{{ app.id }}" method="post" style="margin-top: 12px; display: flex; gap: 10px;">
-        <input type="hidden" name="user_id" value="{{ user_id }}">
-        <button name="status" value="Accepted" style="background: #6ee7b7; color: #065f46; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #bbf7d0; cursor: pointer;">Accept</button>
-        <button name="status" value="Rejected" style="background: #fee2e2; color: #ef4444; font-weight: 600; padding: 8px 22px; border-radius: 10px; border: none; box-shadow: 0 2px 8px #fecaca; cursor: pointer;">Reject</button>
-      </form>
-    </div>
-    {% endfor %}
-
-    <!-- Carousel Buttons -->
-    <button onclick="prevApp()" style="position: absolute; top: 50%; left: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10094;</button>
-    <button onclick="nextApp()" style="position: absolute; top: 50%; right: -50px; transform: translateY(-50%); background: #5b7fa3; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer;">&#10095;</button>
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+  
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin: 0 0 8px 0;">
+      Application Management
+    </h1>
+    <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.1rem; margin: 0;">
+      Review and manage all job applications
+    </p>
   </div>
+  
+  {% if applications %}
+    <!-- Statistics Summary -->
+    <div class="stats-summary">
+      <div class="stat-item stat-pending">
+        <div class="stat-number" id="pending-count">{{ applications | selectattr("status", "equalto", "Pending") | list | length }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-item stat-accepted">
+        <div class="stat-number" id="accepted-count">{{ applications | selectattr("status", "equalto", "Accepted") | list | length }}</div>
+        <div class="stat-label">Accepted</div>
+      </div>
+      <div class="stat-item stat-rejected">
+        <div class="stat-number" id="rejected-count">{{ applications | selectattr("status", "equalto", "Rejected") | list | length }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+    
+    <!-- Status Filters -->
+    <div class="status-filters">
+      <button class="filter-btn filter-all active" onclick="filterApplications('all')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+        </svg>
+        All Applications
+      </button>
+      <button class="filter-btn filter-pending" onclick="filterApplications('pending')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12,6 12,12 16,14"/>
+        </svg>
+        Pending Review
+      </button>
+      <button class="filter-btn filter-accepted" onclick="filterApplications('accepted')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Accepted
+      </button>
+      <button class="filter-btn filter-rejected" onclick="filterApplications('rejected')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        Rejected
+      </button>
+    </div>
+    
+    <!-- Applications Grid -->
+    <div class="applications-grid" id="applications-grid">
+      {% for app in applications %}
+      <div class="application-card status-{{ app.status.lower() }}" data-status="{{ app.status.lower() }}">
+        
+        <!-- Status Badge -->
+        <div class="status-badge">
+          {% if app.status == 'Pending' %}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            Pending
+          {% elif app.status == 'Accepted' %}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Accepted
+          {% elif app.status == 'Rejected' %}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Rejected
+          {% endif %}
+        </div>
+        
+        <!-- Freelancer Info -->
+        <div class="freelancer-info">
+          <div class="freelancer-avatar">
+            {{ app.freelancer.name[0] }}
+          </div>
+          <div class="freelancer-details">
+            <h4>{{ app.freelancer.name }}</h4>
+            <p class="job-title">Applied for: {{ app.job.title }}</p>
+          </div>
+        </div>
+        
+        <!-- Application Details -->
+        <div class="application-details">
+          <div class="detail-section">
+            <span class="detail-label">Experience Level:</span>
+            <div class="detail-value">{{ app.experience }}</div>
+          </div>
+          
+          <div class="detail-section">
+            <span class="detail-label">Cover Letter:</span>
+            <div class="cover-letter-preview">
+              {{ app.cover_letter[:120] }}{% if app.cover_letter|length > 120 %}...{% endif %}
+            </div>
+          </div>
+          
+          <div class="detail-section">
+            <span class="detail-label">Resume:</span>
+            <a href="{{ app.resume_link }}" target="_blank" class="resume-link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                <polyline points="14,2 14,8 20,8"/>
+              </svg>
+              View Resume
+            </a>
+          </div>
+          
+          {% if app.applied_at %}
+          <div class="detail-section">
+            <span class="detail-label">Applied:</span>
+            <div class="detail-value">{{ app.applied_at.strftime('%B %d, %Y') }}</div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Action Buttons / Status Messages -->
+        {% if app.status == 'Pending' %}
+        <div class="action-buttons">
+          <button onclick="handleDecision({{ app.id }}, 'Accepted')" class="action-btn accept-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Accept
+          </button>
+          <button onclick="handleDecision({{ app.id }}, 'Rejected')" class="action-btn reject-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Reject
+          </button>
+        </div>
+        {% elif app.status == 'Accepted' %}
+        <div class="status-actions status-accepted-msg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display: inline; margin-right: 8px;">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          You accepted this application
+          {% if app.updated_at %}
+          <div style="font-size: 0.8rem; margin-top: 4px; opacity: 0.8;">
+            {{ app.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+          </div>
+          {% endif %}
+        </div>
+        {% elif app.status == 'Rejected' %}
+        <div class="status-actions status-rejected-msg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display: inline; margin-right: 8px;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          You rejected this application
+          {% if app.updated_at %}
+          <div style="font-size: 0.8rem; margin-top: 4px; opacity: 0.8;">
+            {{ app.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="empty-state" id="empty-state" style="display: none;">
+      <div style="font-size: 3rem; margin-bottom: 16px;">🔍</div>
+      <h3 style="color: #374151; margin-bottom: 8px;">No Applications Found</h3>
+      <p style="color: #6b7280;">No applications match the selected filter.</p>
+    </div>
+    
   {% else %}
-    <p style="color: #64748b; padding: 10px; background: #f3f8fd; border-radius: 10px; text-align: center;">No applications received yet.</p>
+    <div class="empty-state">
+      <div style="font-size: 4rem; margin-bottom: 20px;">📋</div>
+      <h3 style="color: #374151; margin-bottom: 12px;">No Applications Yet</h3>
+      <p style="color: #6b7280; margin-bottom: 24px;">Applications will appear here when freelancers apply to your jobs.</p>
+      <a href="/employer/post-job?user_id={{ user_id }}" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 4v16m8-8H4"/>
+        </svg>
+        Post Your First Job
+      </a>
+    </div>
   {% endif %}
-
-  <div style="margin-top: 20px; text-align: center;">
-    <a href="/employer/dashboard?user_id={{ user_id }}" 
-       style="color: #3b82f6; text-decoration: underline; font-weight: 500;">⬅ Back to Dashboard</a>
+  
+  <!-- Back to Dashboard -->
+  <div style="text-align: center; margin-top: 40px;">
+    <a href="/employer/dashboard?user_id={{ user_id }}" style="color: #3b82f6; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(59, 130, 246, 0.1); border-radius: 12px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Dashboard
+    </a>
   </div>
 </div>
 
 <script>
-let currentAppIndex = 0;
-const apps = document.querySelectorAll(".app-card");
+async function handleDecision(appId, status) {
+  const buttons = document.querySelectorAll('.action-btn');
+  buttons.forEach(btn => btn.disabled = true);
+  
+  try {
+    const formData = new FormData();
+    formData.append('status', status);
+    formData.append('user_id', '{{ user_id }}');
+    
+    const response = await fetch(`/employer/decision/${appId}`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (response.ok) {
+      // Reload page to show updated status
+      window.location.reload();
+    } else {
+      throw new Error('Failed to process application');
+    }
+  } catch (error) {
+    console.error('Error processing application:', error);
+    alert('There was an error processing the application. Please try again.');
+    buttons.forEach(btn => btn.disabled = false);
+  }
+}
 
-function showApp(index) {
-  apps.forEach((app, i) => {
-    app.style.display = (i === index) ? "block" : "none";
+function filterApplications(filter) {
+  const cards = document.querySelectorAll('.application-card');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const emptyState = document.getElementById('empty-state');
+  
+  // Update filter buttons
+  filterBtns.forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.filter-${filter}`).classList.add('active');
+  
+  let visibleCount = 0;
+  
+  cards.forEach(card => {
+    const status = card.getAttribute('data-status');
+    if (filter === 'all' || status === filter) {
+      card.style.display = 'block';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
   });
+  
+  // Show/hide empty state
+  emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
 }
 
-function nextApp() {
-  currentAppIndex = (currentAppIndex + 1) % apps.length;
-  showApp(currentAppIndex);
-}
-
-function prevApp() {
-  currentAppIndex = (currentAppIndex - 1 + apps.length) % apps.length;
-  showApp(currentAppIndex);
-}
+// Initialize filter
+document.addEventListener('DOMContentLoaded', function() {
+  filterApplications('all');
+});
 </script>
+
 {% endblock %}

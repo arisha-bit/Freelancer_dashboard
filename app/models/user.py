@@ -11,6 +11,6 @@ class User(Base):
     password = Column(String, nullable=False)
     role = Column(String, nullable=False)
 
-    # ✅ Correct model names
+    
     jobs = relationship("Job", back_populates="employer")
     applications = relationship("JobApplication", back_populates="freelancer")

@@ -4,14 +4,260 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Freelancer App</title>
-  <!-- Tailwind CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e'
+            },
+            accent: {
+              50: '#fdf4ff',
+              100: '#fae8ff',
+              500: '#d946ef',
+              600: '#c026d3'
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+            'slide-up': 'slide-up 0.5s ease-out',
+            'fade-in': 'fade-in 0.8s ease-out'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)' },
+              '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.6)' }
+            },
+            'slide-up': {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' }
+            },
+            'fade-in': {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom gradient backgrounds */
+    .bg-gradient-main {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #fdf4ff 75%, #f3f8fd 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .bg-gradient-main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e0f2fe' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .card-main {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 
+        0 8px 32px rgba(14, 165, 233, 0.1),
+        0 4px 16px rgba(192, 38, 211, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .floating-shapes::before,
+    .floating-shapes::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, rgba(14, 165, 233, 0.1), rgba(192, 38, 211, 0.1));
+      animation: float 10s ease-in-out infinite;
+    }
+    
+    .floating-shapes::before {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      right: 10%;
+      animation-delay: -2s;
+    }
+    
+    .floating-shapes::after {
+      width: 150px;
+      height: 150px;
+      bottom: 20%;
+      left: 15%;
+      animation-delay: -4s;
+    }
+    
+    /* Header decoration */
+    .header-decoration {
+      background: linear-gradient(90deg, #0ea5e9, #d946ef, #0ea5e9);
+      background-size: 200% 100%;
+      animation: glow 3s ease-in-out infinite;
+    }
+    
+    /* Content area styling */
+    .content-area {
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Hover effects */
+    .card-main:hover {
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 16px 48px rgba(14, 165, 233, 0.15),
+        0 8px 24px rgba(192, 38, 211, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Professional touch - subtle animations */
+    .animate-on-load {
+      animation: slide-up 0.6s ease-out, fade-in 0.8s ease-out;
+    }
+  </style>
 </head>
-<body style="background: linear-gradient(135deg, #e0e7ff 0%, #f3f8fd 100%); min-height: 100vh; padding: 32px;">
-  <div style="max-width: 900px; margin: 0 auto; background: #fff; border-radius: 28px; box-shadow: 0 8px 40px #c7e0f7; padding: 40px 32px 32px 32px;">
-    {% block content %}
-    <!-- Content from child templates will be inserted here -->
-    {% endblock %}
+<body class="bg-gradient-main min-h-screen p-4 sm:p-6 lg:p-8">
+ 
+  <div class="floating-shapes"></div>
+  
+  
+  <div class="max-w-6xl mx-auto animate-on-load">
+   
+    <div class="header-decoration h-1 w-full rounded-full mb-8"></div>
+    
+   
+    <div class="card-main rounded-3xl p-6 sm:p-8 lg:p-12 transition-all duration-300 hover:shadow-2xl content-area">
+   
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl mb-4 animate-float">
+          <i class="fas fa-laptop-code text-white text-2xl"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary-800 to-accent-600 bg-clip-text text-transparent mb-2">
+          Freelancer Hub
+        </h1>
+        <p class="text-gray-600 text-lg">Professional • Modern • Reliable</p>
+      </div>
+      
+    
+      <div class="relative">
+        {% block content %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-primary-50 to-primary-100 p-6 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center text-white mr-4">
+                <i class="fas fa-users"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-800">Clients</h3>
+            </div>
+            <p class="text-primary-600">Manage your client relationships</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-accent-50 to-accent-100 p-6 rounded-2xl border border-accent-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-accent-500 rounded-xl flex items-center justify-center text-white mr-4">
+                <i class="fas fa-project-diagram"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-accent-800">Projects</h3>
+            </div>
+            <p class="text-accent-600">Track your ongoing work</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-2xl border border-green-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white mr-4">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-green-800">Earnings</h3>
+            </div>
+            <p class="text-green-600">Monitor your income</p>
+          </div>
+        </div>
+        
+        <div class="text-center py-8">
+          <p class="text-gray-500 mb-4">Your content will replace this sample content</p>
+          <button class="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-8 py-3 rounded-2xl font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+            Get Started
+          </button>
+        </div>
+        {% endblock %}
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="text-center mt-8 text-gray-500">
+      <p>&copy; 2024 Freelancer App. Built with care.</p>
+    </div>
   </div>
+  
+
+  <script>
+   
+    document.addEventListener('DOMContentLoaded', function() {
+      
+      const cards = document.querySelectorAll('.hover\\:shadow-lg');
+      cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+        card.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0) scale(1)';
+        });
+      });
+      
+   
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+      
+     
+      document.querySelectorAll('.grid > div').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+      });
+    });
+  </script>
 </body>
 </html>
